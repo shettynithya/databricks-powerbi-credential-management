@@ -1,4 +1,15 @@
 # Databricks notebook source
+dbutils.widgets.text("gateway_name", "PowerBI Gateway Name")
+dbutils.widgets.text("gateway_datasource_name", "PowerBI Gateway Datasource Name")
+dbutils.widgets.text("dataset_id", "PowerBI Dataset Id")
+dbutils.widgets.text("workspace_id", "PowerBI Workspace Id")
+dbutils.widgets.text("secret_scope", "Secrets Scope")
+dbutils.widgets.text("client_id_secret", "Client ID Secret")
+dbutils.widgets.text("client_secret_secret", "Client Secret Secret")
+dbutils.widgets.text("tenant_id_secret", "Tenant ID Secret")
+
+# COMMAND ----------
+
 # MAGIC %load_ext autoreload
 # MAGIC %autoreload 2
 # MAGIC # Enables autoreload; learn more at https://docs.databricks.com/en/files/workspace-modules.html#autoreload-for-python-modules
@@ -33,17 +44,19 @@
 
 # COMMAND ----------
 
-#The following service principal is an Azure Entra Service principal used for connecting to power bi and databricks 
-client_id = dbutils.secrets.get("nshetty", "catalyst-client_id")
-client_secret= dbutils.secrets.get("nshetty", "catalyst-client_secret")
-# entra tenant id
-tenant_id=dbutils.secrets.get("nshetty", "catalyst-tenant_id")
-
 # get parameters
 gateway_name=dbutils.widgets.get("gateway_name")
 gateway_datasource_name=dbutils.widgets.get("gateway_datasource_name")
 dataset_id=dbutils.widgets.get("dataset_id")
 workspace_id=dbutils.widgets.get("workspace_id")
+
+#The following service principal is an Azure Entra Service principal used for connecting to power bi and databricks 
+client_id = dbutils.secrets.get(dbutils.widgets.get("secret_scope"), dbutils.widgets.get("client_id_secret"))
+client_secret= dbutils.secrets.get(dbutils.widgets.get("secret_scope"), dbutils.widgets.get("client_secret_secret"))
+# entra tenant id
+tenant_id=dbutils.secrets.get(dbutils.widgets.get("secret_scope"), dbutils.widgets.get("tenant_id_secret"))
+
+
 
 # COMMAND ----------
 
