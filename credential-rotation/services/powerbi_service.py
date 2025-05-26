@@ -1,6 +1,6 @@
 import json, requests, azure.identity
 
-class PbiEmbedService(object):
+class PbiService(object):
 
     def create_credential(self, tenant_id, client_id, client_secret, user_login = False):
         if user_login:
@@ -13,13 +13,6 @@ class PbiEmbedService(object):
         return access_token_class.token
 
     def get_request_header(self):
-        """
-        Get Power BI API request header
-
-        Returns:
-            Dict: Request header
-        """
-
         return {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + self.get_access_token()}
     
     def get_gateway_id(self, gateway_name):
@@ -35,7 +28,6 @@ class PbiEmbedService(object):
             r=requests.get(f"https://api.powerbi.com/v1.0/myorg/gateways/{gatewayId}", headers = headers)
             t=json.loads(r.text)
             return t["publicKey"]
-
     def update_gateway_pat(self, gatewayId, datasource_name, pat):
             headers = self.get_request_header()
             r = requests.get(f"https://api.powerbi.com/v1.0/myorg/gateways/{gatewayId}/datasources", headers = headers)
@@ -77,3 +69,25 @@ class PbiEmbedService(object):
         }
         update_pat = requests.patch(f"https://api.powerbi.com/v1.0/myorg/gateways/{gateway_id}/datasources/{datasource_id}", json=requestBodyJson, headers = headers)
         return update_pat
+    
+    def update_dataset_m2m_oauth(self, workspace_id, dataset_id, client_id, client_secret):
+        headers = self.get_request_header()
+        r = requests.post(f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/Default.TakeOver", headers = headers)
+        
+        _dsobject = requests.get(f" https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/datasources", headers = headers)
+      
+        _dso = json.loads(_dsobject.text)
+        datasource_id =_dso["value"][0]["datasourceId"]
+        gateway_id = _dso["value"][0]["gatewayId"]
+        requestBodyJson = {
+          "credentialDetails": {
+          "credentialType": "Basic",
+          "credentials": f'{{"credentialData":[{{"name":"username", "value": "{client_id}"}},{{"name":"password", "value": "{client_secret}"}}]}}',
+          "encryptedConnection": "Encrypted",
+          "encryptionAlgorithm": "None",
+          "privacyLevel": "None",
+          "useEndUserOAuth2Credentials": "False"
+         }
+        }
+        update_oauth = requests.patch(f"https://api.powerbi.com/v1.0/myorg/gateways/{gateway_id}/datasources/{datasource_id}", json=requestBodyJson, headers = headers)
+        return update_oauth
