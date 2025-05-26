@@ -137,7 +137,6 @@ pat = t.token_value   # This is the token to use in PowerBI
 
 # COMMAND ----------
 
-from services.encrypt_credential_service import EncryptCredentialService
 from services.powerbi_service import PbiService
 
 pbi_svc = PbiService()
@@ -163,6 +162,7 @@ public_key=pbi_svc.get_gateway_public_key(gatewayId)
 
 # COMMAND ----------
 
+from services.encrypt_credential_service import EncryptCredentialService
 enc=EncryptCredentialService(public_key)
 serialized_credentials = '{\'credentialData\':[{\'name\':\'key\',\'value\':\'' + pat + '\'}]}'
 encrypted_credentials=enc.encode_credentials(serialized_credentials)

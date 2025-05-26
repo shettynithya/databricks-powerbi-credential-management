@@ -118,9 +118,8 @@ databricks_client_secret=dbutils.secrets.get(dbutils.widgets.get(""), "")
 
 # COMMAND ----------
 
-from services.encrypt_credential_service import EncryptCredentialService
-from services.powerbi_service import PbiService
 
+from services.powerbi_service import PbiService
 pbi_svc = PbiService()
 pbi_svc.create_credential(tenant_id=tenant_id, client_id=client_id, client_secret=databricks_client_secret, user_login = False)
 
@@ -144,6 +143,7 @@ public_key=pbi_svc.get_gateway_public_key(gatewayId)
 
 # COMMAND ----------
 
+from services.encrypt_credential_service import EncryptCredentialService
 enc=EncryptCredentialService(public_key)
 serialized_credentials = '{\'credentialData\':[{\'name\':\'username\', \'value\':\''+ client_id + '\'},{\'name\':\'password\', \'value\':\''+ client_secret +'\'}}]}'
 encrypted_credentials=enc.encode_credentials(serialized_credentials)
